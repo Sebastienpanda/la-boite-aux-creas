@@ -20,4 +20,15 @@ export default class UsersController {
       return response.badRequest(error)
     }
   }
+
+  async logout({ auth, response }: HttpContext) {
+    try {
+      await auth.use('web').logout()
+      return response.ok({
+        success: true,
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }
 }

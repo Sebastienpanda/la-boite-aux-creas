@@ -21,6 +21,7 @@ router
 router
   .group(() => {
     router.get('/me', [UsersController, 'me'])
+    router.post('/logout', [UsersController, 'logout'])
   })
   .prefix('api')
   .use(
