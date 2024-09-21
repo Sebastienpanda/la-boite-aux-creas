@@ -36,7 +36,13 @@ export default class AuthentificationsController {
     try {
       const { email, password } = request.only(['email', 'password'])
 
-      const user = await this.userRepository.getLogin(email, password, auth)
+      const user = await this.userRepository.postLogin(email, password, auth)
+
+      if (user.deletedAt !== null) {
+        return response.ok({
+          message: 'Account deleted',
+        })
+      }
 
       return response.ok(user)
     } catch (error) {}
