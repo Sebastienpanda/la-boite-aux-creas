@@ -35,4 +35,16 @@ export class UserRepository {
 
     return user
   }
+
+  async getLogin(
+    email: string,
+    password: string,
+    auth: Authenticator<Authenticators>
+  ): Promise<User> {
+    const user = await User.verifyCredentials(email, password)
+
+    await auth.use('web').login(user)
+
+    return user
+  }
 }

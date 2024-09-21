@@ -15,6 +15,7 @@ router.on('/').renderInertia('home')
 router
   .group(() => {
     router.post('/signin', [AuthentificationsController, 'createUser'])
+    router.post('/login', [AuthentificationsController, 'login'])
   })
   .prefix('api')
 

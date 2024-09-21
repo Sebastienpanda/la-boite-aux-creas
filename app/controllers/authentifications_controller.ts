@@ -31,4 +31,14 @@ export default class AuthentificationsController {
       return response.unprocessableEntity(error.messages)
     }
   }
+
+  async login({ request, response, auth }: HttpContext) {
+    try {
+      const { email, password } = request.only(['email', 'password'])
+
+      const user = await this.userRepository.getLogin(email, password, auth)
+
+      return response.ok(user)
+    } catch (error) {}
+  }
 }
