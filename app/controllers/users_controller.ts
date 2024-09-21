@@ -33,9 +33,7 @@ export default class UsersController {
   async logout({ auth, response }: HttpContext) {
     try {
       await this.userRepository.logoutUserSession(auth)
-      return response.ok({
-        success: true,
-      })
+      return response.redirect().toRoute('/')
     } catch (error) {
       console.log(error)
     }

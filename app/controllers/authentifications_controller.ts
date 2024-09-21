@@ -26,7 +26,7 @@ export default class AuthentificationsController {
 
       await this.userRepository.loginUserSession(user, auth)
 
-      return response.created(user)
+      return response.redirect().toRoute('dashboard')
     } catch (error) {
       return response.unprocessableEntity(error.messages)
     }
@@ -44,7 +44,7 @@ export default class AuthentificationsController {
         })
       }
 
-      return response.ok(user)
+      return response.redirect().toRoute('dashboard')
     } catch (error) {}
   }
 }
