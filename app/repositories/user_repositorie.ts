@@ -1,4 +1,6 @@
 import User from '#models/user'
+import type { Authenticator } from '@adonisjs/auth'
+import { Authenticators } from '@adonisjs/auth/types'
 import { DateTime } from 'luxon'
 
 export class UserRepository {
@@ -24,6 +26,12 @@ export class UserRepository {
       verificationCode: data.verificationCode || null,
       verificationCodeExpiresAt: data.verificationCodeExpiresAt || null,
     })
+
+    return user
+  }
+
+  async getByUserAuth(auth: Authenticator<Authenticators>): Promise<User> {
+    const user = await auth.authenticate()
 
     return user
   }
