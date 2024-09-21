@@ -1,8 +1,8 @@
-import { DateTime } from 'luxon'
-import hash from '@adonisjs/core/services/hash'
-import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
+import { compose } from '@adonisjs/core/helpers'
+import hash from '@adonisjs/core/services/hash'
+import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { DateTime } from 'luxon'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -11,10 +11,10 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
 
 export default class User extends compose(BaseModel, AuthFinder) {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: string
 
   @column()
-  declare fullName: string | null
+  declare pseudo: string | null
 
   @column()
   declare email: string
@@ -22,9 +22,30 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column({ serializeAs: null })
   declare password: string
 
+  @column()
+  declare avatar: string | null
+
+  @column()
+  declare creator: boolean
+
+  @column()
+  declare role: number
+
+  @column()
+  declare emailVerified: boolean
+
+  @column()
+  declare verificationCode: string | null
+
+  @column.dateTime()
+  declare verificationCodeExpiresAt: DateTime | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+
+  @column.dateTime()
+  declare deletedAt: DateTime | null
 }
