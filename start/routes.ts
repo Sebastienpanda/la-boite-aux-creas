@@ -23,6 +23,8 @@ router
   .group(() => {
     router.get('/me', [UsersController, 'me'])
     router.post('/logout', [UsersController, 'logout'])
+    router.delete('/delete', [UsersController, 'delete'])
+    router.get('restore/:id', [UsersController, 'restore'])
   })
   .prefix('api')
   .use(

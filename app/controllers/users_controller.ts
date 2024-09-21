@@ -21,6 +21,15 @@ export default class UsersController {
     }
   }
 
+  async delete({ response, auth }: HttpContext) {
+    try {
+      await this.userRepository.postDelete(auth)
+      return response.noContent()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   async logout({ auth, response }: HttpContext) {
     try {
       await auth.use('web').logout()
@@ -30,5 +39,15 @@ export default class UsersController {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  async restore({ auth, response, request }: HttpContext) {
+    try {
+      const id = request.param('id')
+
+      const user = await this.userRepository.postRestore(id, auth)
+
+      return response.ok(user)
+    } catch (error) {}
   }
 }

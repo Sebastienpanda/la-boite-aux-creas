@@ -36,7 +36,7 @@ export class UserRepository {
     return user
   }
 
-  async getLogin(
+  async postLogin(
     email: string,
     password: string,
     auth: Authenticator<Authenticators>
@@ -46,5 +46,37 @@ export class UserRepository {
     await auth.use('web').login(user)
 
     return user
+  }
+
+  async postDelete(auth: Authenticator<Authenticators>): Promise<{}> {
+    const userAuth = await this.getByUserAuth(auth)
+
+    const user = await User.findBy('email', userAuth.email)
+
+    if (user) {
+      user.deletedAt = DateTime.now()
+
+      await user.save()
+
+      await auth.use('web').logout()
+    }
+
+    return {}
+  }
+
+  async postRestore(id: string, auth: Authenticator<Authenticators>): Promise<User | null> {
+    const user = await User.findBy('id', id)
+
+    if (user) {
+      user.deletedAt = null
+
+      await user.save()
+
+      await auth.use('web').login(user)
+
+      return user
+    }
+
+    return null
   }
 }
