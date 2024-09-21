@@ -1,55 +1,54 @@
 import User from '#models/user'
+import { UserRole } from '#types/user_role'
+import { UserSchema } from '#types/users_schema'
 import type { Authenticator } from '@adonisjs/auth'
 import { Authenticators } from '@adonisjs/auth/types'
 import { DateTime } from 'luxon'
 
 export class UserRepository {
-  async createUser(data: {
-    pseudo: string
-    email: string
-    password: string
-    avatar?: string
-    creator?: boolean
-    role?: number
-    emailVerified?: boolean
-    verificationCode?: string
-    verificationCodeExpiresAt?: DateTime | null
-  }): Promise<User> {
-    const user = await User.create({
-      pseudo: data.pseudo,
-      email: data.email,
-      password: data.password,
-      avatar: data.avatar || null,
-      creator: data.creator ?? false,
-      role: data.role ?? 0, // Par défaut, rôle 'User'
-      emailVerified: data.emailVerified ?? false,
-      verificationCode: data.verificationCode || null,
-      verificationCodeExpiresAt: data.verificationCodeExpiresAt || null,
-    })
-
-    return user
-  }
-
-  async getByUserAuth(auth: Authenticator<Authenticators>): Promise<User> {
+  // Functions Authenticated User
+  async getAuthenticatedUser(auth: Authenticator<Authenticators>): Promise<User> {
     const user = await auth.authenticate()
 
     return user
   }
 
-  async postLogin(
+  async loginUserSession(user: User, auth: Authenticator<Authenticators>): Promise<void> {
+    await auth.use('web').login(user)
+  }
+
+  async logoutUserSession(auth: Authenticator<Authenticators>): Promise<void> {
+    await auth.use('web').logout()
+  }
+
+  // CRUD Users
+  async createUser(data: UserSchema): Promise<User> {
+    const user = await User.create({
+      pseudo: data.pseudo,
+      email: data.email,
+      password: data.password,
+      role: data.role ?? UserRole.User,
+    })
+
+    return user
+  }
+
+  async loginUser(
     email: string,
     password: string,
     auth: Authenticator<Authenticators>
   ): Promise<User> {
     const user = await User.verifyCredentials(email, password)
 
-    await auth.use('web').login(user)
+    await this.loginUserSession(user, auth)
 
     return user
   }
 
-  async postDelete(auth: Authenticator<Authenticators>): Promise<{}> {
-    const userAuth = await this.getByUserAuth(auth)
+  async softDeleteUser(
+    auth: Authenticator<Authenticators>
+  ): Promise<{ success: boolean; message: string }> {
+    const userAuth = await this.getAuthenticatedUser(auth)
 
     const user = await User.findBy('email', userAuth.email)
 
@@ -58,21 +57,21 @@ export class UserRepository {
 
       await user.save()
 
-      await auth.use('web').logout()
+      await this.logoutUserSession(auth)
     }
 
-    return {}
+    return { success: true, message: 'User soft deleted  and logget out' }
   }
 
-  async postRestore(id: string, auth: Authenticator<Authenticators>): Promise<User | null> {
+  async restoreUser(id: string, auth: Authenticator<Authenticators>): Promise<User | null> {
     const user = await User.findBy('id', id)
 
-    if (user) {
+    if (user && user.deletedAt) {
       user.deletedAt = null
 
       await user.save()
 
-      await auth.use('web').login(user)
+      await this.loginUserSession(user, auth)
 
       return user
     }

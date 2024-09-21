@@ -24,7 +24,7 @@ export default class AuthentificationsController {
         role: UserRole.User,
       })
 
-      await auth.use('web').login(user)
+      await this.userRepository.loginUserSession(user, auth)
 
       return response.created(user)
     } catch (error) {
@@ -36,7 +36,7 @@ export default class AuthentificationsController {
     try {
       const { email, password } = request.only(['email', 'password'])
 
-      const user = await this.userRepository.postLogin(email, password, auth)
+      const user = await this.userRepository.loginUser(email, password, auth)
 
       if (user.deletedAt !== null) {
         return response.ok({

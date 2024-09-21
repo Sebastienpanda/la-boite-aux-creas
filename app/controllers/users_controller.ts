@@ -12,7 +12,7 @@ export default class UsersController {
 
   async me({ response, auth }: HttpContext) {
     try {
-      const user = await this.userRepository.getByUserAuth(auth)
+      const user = await this.userRepository.getAuthenticatedUser(auth)
 
       return response.ok(user)
     } catch (error) {
@@ -23,7 +23,7 @@ export default class UsersController {
 
   async delete({ response, auth }: HttpContext) {
     try {
-      await this.userRepository.postDelete(auth)
+      await this.userRepository.softDeleteUser(auth)
       return response.noContent()
     } catch (error) {
       console.log(error)
@@ -32,7 +32,7 @@ export default class UsersController {
 
   async logout({ auth, response }: HttpContext) {
     try {
-      await auth.use('web').logout()
+      await this.userRepository.logoutUserSession(auth)
       return response.ok({
         success: true,
       })
@@ -45,7 +45,7 @@ export default class UsersController {
     try {
       const id = request.param('id')
 
-      const user = await this.userRepository.postRestore(id, auth)
+      const user = await this.userRepository.restoreUser(id, auth)
 
       return response.ok(user)
     } catch (error) {}
